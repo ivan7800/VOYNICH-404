@@ -1,0 +1,100 @@
+"""Functional UI regression in controlled about:blank DOM with mocked official IIIF responses.
+Does not validate Yale service reachability, actual scans or network ESM imports.
+"""
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+import json, shutil, tempfile
+root=Path(__file__).resolve().parents[1]
+html=(root/'index.html').read_text()
+css='\n'.join((root/p).read_text() for p in ['assets/css/styles.css','assets/css/phase2.css','assets/css/viewer.css'])
+data=(root/'assets/js/data.js').read_text().replace('export const ','const ')
+iiif=(root/'assets/js/iiif.js').read_text().replace('export const ','const ').replace('export function ','function ').replace('export async function ','async function ')
+annotation=(root/'assets/js/annotations.js').read_text().replace('export const ','const ').replace('export function ','function ')
+viewer=(root/'assets/js/viewer.js').read_text().replace("import {MANIFESTS, YALE_CATALOG, parseManifest, fetchManifest, pageUrl} from './iiif.js';",'').replace("import {ANNOTATIONS_KEY,MAX_ANNOTATIONS,parseAnnotations,parseAnnotationsBackup,backupAnnotations,folioAnnotations,mergeAnnotations,coordinateInImage} from './annotations.js';",'').replace('export function ','function ')
+app=(root/'assets/js/app.js').read_text().replace("import {SOURCES,SECTIONS,EVIDENCE,TIMELINE,STATUS} from './data.js';",'').replace("import {viewerHTML,mountViewer} from './viewer.js';",'const {viewerHTML,mountViewer}=window.__viewerExports;')
+manifest=json.loads((root/'tests/fixtures/iiif-v2.json').read_text())
+pixel='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="360" height="550"%3E%3Crect width="360" height="550" fill="%23e1cda3"/%3E%3Ctext x="30" y="150" fill="%233f3329"%3ESIMULATED TEST IMAGE%3C/text%3E%3C/svg%3E'
+setup='''<script>
+Object.defineProperty(window,'localStorage',{configurable:true,value:(()=>{const m=new Map();return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)},clear(){m.clear()}}})()});
+window.fetch=async()=>({ok:true,headers:{get:()=>null},text:async()=>JSON.stringify(window.__fixture)});
+const OriginalImage=window.Image;window.Image=function(){const img=new OriginalImage();let actual='';Object.defineProperty(img,'src',{get(){return actual},set(v){actual=v;img.setAttribute('data-yale-url',v);img.setAttribute('src',window.__pixel)}});return img};
+</script>'''
+html=html.replace('<link rel="stylesheet" href="assets/css/styles.css">','<style>'+css+'</style>').replace('<link rel="stylesheet" href="assets/css/phase2.css">','').replace('<link rel="stylesheet" href="assets/css/viewer.css">','').replace('<script type="module" src="assets/js/app.js"></script>','')
+html=html.replace('</body>',setup+'<script>'+data+'\n'+iiif+'\n'+ '(function(){'+annotation+'\n'+viewer+'\nwindow.__viewerExports={viewerHTML,mountViewer};})();'+'\n'+app+'</script></body>')
+checks=[];errors=[]
+def check(label,test):
+ if not test:raise AssertionError('FAILED: '+label)
+ checks.append('PASS '+label)
+with sync_playwright() as p:
+ browser=p.chromium.launch(headless=True,executable_path=shutil.which('chromium') or '/usr/bin/chromium',args=['--no-sandbox'])
+ desktop=browser.new_page(viewport={'width':1440,'height':960},accept_downloads=True)
+ desktop.on('pageerror',lambda err:errors.append('JS '+str(err)))
+ desktop.evaluate('() => {}')
+ # set fixtures before app creation by replacing placeholder in setup script
+ rendered=html.replace('window.fetch=async()=>',f'window.__fixture={json.dumps(manifest)};window.__pixel={json.dumps(pixel)};window.fetch=async()=>')
+ desktop.set_content(rendered,wait_until='load');desktop.wait_for_selector('.feature')
+ check('home visible',desktop.locator('h1').first.inner_text().startswith('El libro'))
+ desktop.locator('[data-view=visor]').click();desktop.wait_for_selector('#folioImage')
+ check('IIIF 2 official manifest parsed',desktop.locator('.folio-position').count()==1 and desktop.locator('#folioTitle').inner_text()=='f1r')
+ check('three canvas entries present',desktop.locator('#folioCount').inner_text()=='3 imágenes')
+ check('image URL uses Yale IIIF',desktop.locator('#folioImage').get_attribute('data-yale-url').startswith('https://images.collections.yale.edu/iiif/test1/full/1400,'))
+ check('prev disabled on first',desktop.locator('#folioPrev').is_disabled())
+ desktop.locator('#folioNext').click();desktop.wait_for_timeout(100)
+ check('next selects f1v',desktop.locator('#folioTitle').inner_text()=='f1v' and desktop.locator('#folioPosition').inner_text()=='2 / 3')
+ desktop.locator('#folioSearch').fill('f2r')
+ check('search filters indexed pages',desktop.locator('.folio-page').count()==1)
+ desktop.locator('.folio-page').click()
+ check('direct selection selects third',desktop.locator('#folioTitle').inner_text()=='f2r' and desktop.locator('#folioNext').is_disabled())
+ desktop.locator('#folioZoomIn').click()
+ check('zoom in updates scale',desktop.locator('#folioScale').inner_text()=='135%')
+ desktop.locator('#folioZoomOut').click()
+ check('zoom out resets',desktop.locator('#folioScale').inner_text()=='100%')
+ desktop.locator('#folioBookmark').click()
+ check('bookmark saved with stable ID',desktop.locator('#folioBookmark').get_attribute('aria-pressed')=='true' and 'test3' in desktop.evaluate("localStorage.getItem('voynich404-folio-bookmarks-v1')"))
+ desktop.locator('#folioNote').click()
+ check('folio-to-note navigation',desktop.locator('#noteTitle').input_value()=='Folio f2r')
+ desktop.locator('#noteBody').fill('Investigación visual sobre el folio f2r')
+ desktop.locator('#noteForm button').click()
+ check('note retained',desktop.locator('.note').count()==1)
+ desktop.locator('[data-view=visor]').click();desktop.wait_for_selector('#folioImage')
+ check('last visited folio restored',desktop.locator('#folioTitle').inner_text()=='f2r')
+ check('bookmark restored',desktop.locator('#folioBookmark').get_attribute('aria-pressed')=='true')
+ desktop.locator('#folioSearch').fill('f1')
+ check('filter matches multiple labels',desktop.locator('.folio-page').count()==2)
+ desktop.locator('#folioSearch').fill('')
+ desktop.locator('#folioStage').focus();desktop.keyboard.press('ArrowLeft')
+ check('keyboard previous',desktop.locator('#folioTitle').inner_text()=='f1v')
+ desktop.locator('#folioReload').click();desktop.wait_for_timeout(100)
+ check('refresh retains selection',desktop.locator('#folioTitle').inner_text()=='f1v')
+ desktop.locator('[data-view=codice]').click()
+ check('six historical sections retained',desktop.locator('.section-card').count()==6)
+ desktop.locator('[data-view=evidencias]').click()
+ check('nine evidence cards retained',desktop.locator('.research-card').count()==9)
+ desktop.locator('[data-view=cuaderno]').click()
+ check('previous note persisted',desktop.locator('.note').count()==1)
+ desktop.locator('#openPreferences').click();desktop.locator('[data-skin=pergamino]').click()
+ check('skin controls preserved',desktop.locator('body').get_attribute('data-theme')=='pergamino')
+ desktop.locator('[data-close-dialog=preferencesDialog]').click()
+ # failure scenario: standalone context with mock fetch rejection
+ fallback=browser.new_page(viewport={'width':1024,'height':800})
+ broken=rendered.replace('window.fetch=async()=>({ok:true,headers:{get:()=>null},text:async()=>JSON.stringify(window.__fixture)});','window.fetch=async()=>{throw new Error("Red simulada bloqueada")};')
+ fallback.on('pageerror',lambda err:errors.append('fallback '+str(err)))
+ fallback.set_content(broken,wait_until='load');fallback.locator('[data-view=visor]').click();fallback.wait_for_selector('#folioFallback:visible')
+ check('CORS/network failure informs user',fallback.locator('#folioFallback').is_visible())
+ check('manual JSON import available',fallback.locator('#folioImport').count()==1)
+ fallback.locator('#folioImport').set_input_files(str(root/'tests/fixtures/iiif-v2.json'))
+ fallback.wait_for_selector('#folioImage')
+ check('imported IIIF manifest renders folio',fallback.locator('#folioTitle').inner_text()=='f1r')
+ mobile=browser.new_page(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+ mobile.on('pageerror',lambda err:errors.append('mobile '+str(err)))
+ mobile.set_content(rendered,wait_until='load');mobile.locator('#mobileMenu').click();mobile.locator('[data-view=visor]').click();mobile.wait_for_selector('#folioImage')
+ check('mobile folio viewer visible',mobile.locator('#folioStage').is_visible())
+ check('mobile no horizontal overflow',mobile.evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'))
+ check('mobile navigation closes',mobile.locator('#mobileMenu').get_attribute('aria-expanded')=='false')
+ mobile.set_viewport_size({'width':320,'height':700});mobile.wait_for_timeout(80)
+ check('320px no overflow',mobile.evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'))
+ check('no JS page errors',not errors)
+ browser.close()
+report='# QA — VOYNICH 404 Fase 3\n\n'+'\n'.join('- '+x for x in checks)+f'\n\n**Resultado:** {len(checks)} comprobaciones superadas, {len(errors)} errores de página.\n\n**Alcance:** Browser DOM/CSS/JS reales, ESM ensamblados para pruebas, almacenamiento simulado, manifiestos IIIF v2 y errores HTTP simulados; imagen de prueba sintética. No valida conexión real a Yale ni CORS, ni los lanzadores en sistemas finales.\n'
+(root/'tests/RESULTADOS_FASE3.md').write_text(report)
+print('\n'.join(checks));print('Total',len(checks))

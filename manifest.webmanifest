@@ -1,0 +1,26 @@
+{
+  "name": "VOYNICH 404 — The Undeciphered Codex",
+  "short_name": "VOYNICH 404",
+  "description": "Archivo de investigación del Manuscrito Voynich",
+  "lang": "es",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121411",
+  "theme_color": "#121411",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

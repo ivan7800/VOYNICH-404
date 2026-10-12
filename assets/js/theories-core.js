@@ -1,0 +1,15 @@
+import {THEORY_ENTRIES,THEORY_SOURCES,THEORY_KINDS,THEORY_TOPICS,THEORY_VERDICTS} from './theories-data.js';
+export const FAVORITES_KEY='voynich404-theory-favorites-v1';
+export const normalizeTerm=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').trim();
+export function validateTheoryIndex(entries=THEORY_ENTRIES,sources=THEORY_SOURCES){
+ const errors=[],ids=new Set();for(const e of entries){if(!e||typeof e.id!=='string'||ids.has(e.id))errors.push('ID de ficha ausente/duplicado');ids.add(e?.id);if(!(e?.kind in THEORY_KINDS)||e.kind==='todos')errors.push(`Categoría inválida: ${e?.id}`);if(!(e?.topic in THEORY_TOPICS)||e.topic==='todos')errors.push(`Ámbito inválido: ${e?.id}`);if(!(e?.verdict in THEORY_VERDICTS))errors.push(`Estado inválido: ${e?.id}`);for(const sid of e?.sources??[])if(!sources[sid])errors.push(`Fuente ausente: ${sid}`);if(!e?.sources?.length||!e?.for?.length||!e?.against?.length||!e?.test)errors.push(`Ficha incompleta: ${e?.id}`)}for(const e of entries)for(const id of e?.related??[])if(!ids.has(id))errors.push(`Relación inexistente ${e?.id}→${id}`);return errors;
+}
+export function cleanTheoryFavorites(raw,entries=THEORY_ENTRIES){const valid=new Set(entries.map(e=>e.id));if(!Array.isArray(raw))return [];return [...new Set(raw.filter(x=>typeof x==='string'&&valid.has(x)))].slice(0,100)}
+export function filterTheories(entries=THEORY_ENTRIES,{query='',kind='todos',topic='todos',verdict='todos',favoritesOnly=false,favorites=[],sort='relevancia'}={}){
+ const q=normalizeTerm(query);const fav=new Set(favorites);const result=entries.filter(x=>{
+ if(kind!=='todos'&&x.kind!==kind)return false;if(topic!=='todos'&&x.topic!==topic)return false;if(verdict!=='todos'&&x.verdict!==verdict)return false;if(favoritesOnly&&!fav.has(x.id))return false;
+ if(!q)return true;return normalizeTerm([x.title,x.subtitle,x.people,x.summary,x.period,x.topic,...x.tags,...x.for,...x.against].join(' ')).includes(q);
+ });if(sort==='titulo')return result.sort((a,b)=>a.title.localeCompare(b.title,'es'));if(sort==='recientes')return result.sort((a,b)=>b.year-a.year||a.title.localeCompare(b.title,'es'));return result;
+}
+export function selectTheoryComparison(current,id,limit=3,entries=THEORY_ENTRIES){const valid=new Set(entries.map(x=>x.id));const clean=[...new Set((Array.isArray(current)?current:[]).filter(x=>valid.has(x)))].slice(0,limit);if(!valid.has(id))return clean;if(clean.includes(id))return clean.filter(x=>x!==id);return clean.length<limit?[...clean,id]:clean}
+export function buildResearchExport(ids,{entries=THEORY_ENTRIES,now=new Date().toISOString()}={}){const lookup=new Map(entries.map(e=>[e.id,e]));const unique=[...new Set(ids)].filter(x=>lookup.has(x));return {app:'VOYNICH 404',schemaVersion:1,createdAt:now,disclaimer:'Fichas editoriales y referencias; no son desciframientos ni certezas numéricas.',cards:unique.map(id=>{const x=lookup.get(id);return {...x,sourceDetails:x.sources.map(s=>({id:s,...THEORY_SOURCES[s]}))}})};}

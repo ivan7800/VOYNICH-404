@@ -1,0 +1,37 @@
+/* VOYNICH 404 — Criptoanálisis experimental. Reuses original semantic color tokens. */
+.crypto-shell{display:grid;gap:21px;padding-bottom:24px;min-width:0}
+.crypto-intro,.crypto-panel{border:1px solid var(--line,rgba(185,165,117,.25));background:var(--panel,rgba(25,29,25,.72));border-radius:18px;padding:24px;min-width:0}
+.crypto-intro{display:flex;justify-content:space-between;align-items:center;gap:18px;background:linear-gradient(120deg,rgba(121,111,73,.13),transparent 75%),var(--panel,rgba(25,29,25,.72))}
+.crypto-intro h2,.crypto-head h2{font-family:Georgia,serif;font-size:clamp(1.3rem,2.5vw,2rem);margin:6px 0 10px}
+.crypto-intro p,.crypto-panel p{line-height:1.65;overflow-wrap:anywhere}
+.crypto-actions,.crypto-form,.crypto-bottom{display:flex;flex-wrap:wrap;align-items:end;gap:10px}
+.crypto-actions{justify-content:flex-end}
+#cryptoImport{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.crypto-actions label{cursor:pointer}
+.crypto-actions label:focus-within{outline:2px solid currentColor;outline-offset:3px}
+.crypto-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.crypto-kpis>div{border:1px solid var(--line,rgba(185,165,117,.25));background:var(--panel,rgba(25,29,25,.72));border-radius:12px;padding:16px;min-width:0}
+.crypto-kpis span,.crypto-baseline span{display:block;font-size:.77rem;line-height:1.4;opacity:.8;margin-bottom:8px}
+.crypto-kpis strong,.crypto-baseline strong{font:600 clamp(1.1rem,2.1vw,1.8rem)/1.2 Georgia,serif}
+.crypto-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:15px}
+.crypto-form{margin:12px 0 20px;align-items:end}
+.crypto-form label{display:flex;flex-direction:column;gap:6px;min-width:155px;flex:1;font-size:.83rem}
+.crypto-form select,.crypto-form input{width:100%;padding:11px;border:1px solid var(--line,rgba(185,165,117,.25));border-radius:8px;background:var(--bg,#111);color:var(--text,#eee);font:inherit;min-height:42px}
+.crypto-form button{min-height:42px}
+.crypto-form [hidden]{display:none!important}
+.crypto-hint,.crypto-empty{font-size:.85rem;opacity:.82;line-height:1.55}
+.crypto-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.crypto-compare-card{border:1px solid var(--line,rgba(185,165,117,.25));border-radius:12px;padding:18px;min-width:0}
+.crypto-compare-card h3{margin:8px 0 12px;font-family:Georgia,serif}.crypto-compare-card h4{margin:16px 0 6px}
+.crypto-compare-card dl{margin:0}.crypto-compare-card dl div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line,rgba(185,165,117,.18))}
+.crypto-compare-card dt{font-size:.82rem;opacity:.8}.crypto-compare-card dd{font-weight:600;margin:0;text-align:right}
+.crypto-compare-note{grid-column:1/-1;padding:14px;border-radius:10px;background:rgba(119,108,71,.12);font-size:.9rem}
+.crypto-compare-note p{margin-bottom:0}
+.crypto-ranks{min-width:0}.crypto-rank{display:grid;grid-template-columns:minmax(65px,1.3fr) minmax(25px,3fr) minmax(28px,.5fr);gap:12px;align-items:center;margin:10px 0;font-size:.86rem}
+.crypto-rank code{overflow-wrap:anywhere}.crypto-rank strong{text-align:right;font-variant-numeric:tabular-nums}
+.crypto-meter{background:rgba(124,124,124,.16);border-radius:8px;height:6px;overflow:hidden}.crypto-meter i{display:block;background:var(--accent,#ac9b62);height:100%;border-radius:8px}
+.crypto-triple{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.crypto-triple>div{min-width:0}.crypto-triple h3{font-size:.95rem;margin:8px 0 14px}
+.crypto-baseline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0}.crypto-baseline>div{border:1px solid var(--line,rgba(185,165,117,.25));padding:17px;border-radius:12px}
+.crypto-bottom{justify-content:space-between}.crypto-bottom .micro{max-width:460px}
+@media(max-width:920px){.crypto-intro{display:block}.crypto-actions{justify-content:flex-start;margin-top:12px}.crypto-triple{grid-template-columns:1fr 1fr}.crypto-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.crypto-intro,.crypto-panel{padding:16px}.crypto-comparison,.crypto-triple{grid-template-columns:1fr}.crypto-form label,.crypto-form button{flex-basis:100%}.crypto-baseline{grid-template-columns:1fr}.crypto-kpis{gap:8px}.crypto-kpis>div{padding:11px}}

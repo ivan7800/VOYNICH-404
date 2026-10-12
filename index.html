@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#121411">
+  <meta name="description" content="VOYNICH 404: archivo de investigación histórica sobre el manuscrito Voynich, con evidencias, hipótesis y cuaderno local.">
+  <title>VOYNICH 404 · Archivo del códice</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/phase2.css">
+  <link rel="stylesheet" href="assets/css/viewer.css">
+  <link rel="stylesheet" href="assets/css/atlas.css">
+  <link rel="stylesheet" href="assets/css/transcription.css">
+  <link rel="stylesheet" href="assets/css/crypto.css">
+  <link rel="stylesheet" href="assets/css/theories.css">
+  <link rel="stylesheet" href="assets/css/notebook.css">
+  <link rel="stylesheet" href="assets/css/offline.css">
+  <script type="module" src="assets/js/app.js"></script>
+  <script type="module" src="assets/js/offline.js"></script>
+</head>
+<body data-theme="nocturno" data-type="normal" data-motion="auto">
+  <div id="readingProgress" class="reading-progress" aria-hidden="true"></div>
+  <a class="skip" href="#main">Saltar al contenido</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal" id="sidebar">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">V<span>✣</span></div><div><strong>VOYNICH <em>404</em></strong><small>THE UNDECIPHERED CODEX</small></div></div>
+      <div class="archive-id"><span>ARCHIVO 408</span><span>EST. 1404—1438</span></div>
+      <div class="aside-label">EXPLORAR EL ARCHIVO</div>
+      <nav id="mainNav" class="nav-list" aria-label="Secciones">
+        <button type="button" data-view="inicio" class="nav-link active"><span aria-hidden="true">⌂</span> Inicio</button>
+        <button type="button" data-view="codice" class="nav-link"><span aria-hidden="true">▤</span> El códice</button>
+        <button type="button" data-view="atlas" class="nav-link"><span aria-hidden="true">❧</span> Atlas botánico y astral</button>
+        <button type="button" data-view="transcripcion" class="nav-link"><span aria-hidden="true">⌁</span> Laboratorio EVA</button>
+        <button type="button" data-view="criptoanalisis" class="nav-link"><span aria-hidden="true">⌘</span> Criptoanálisis</button>
+        <button type="button" data-view="visor" class="nav-link"><span aria-hidden="true">▧</span> Folios originales</button>
+        <button type="button" data-view="teorias" class="nav-link"><span aria-hidden="true">⚖</span> Teorías y descubrimientos</button>
+        <button type="button" data-view="evidencias" class="nav-link"><span aria-hidden="true">◈</span> Evidencias</button>
+        <button type="button" data-view="cronologia" class="nav-link"><span aria-hidden="true">◷</span> Cronología</button>
+        <button type="button" data-view="cuaderno" class="nav-link"><span aria-hidden="true">✎</span> Mi cuaderno</button>
+        <button type="button" data-view="fuentes" class="nav-link"><span aria-hidden="true">↗</span> Fuentes</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="phase-note"><span class="status-dot"></span><span>FASE 10 · PWA + OFFLINE</span></div>
+        <p>Una investigación documentada. Ningún descifrado inventado.</p>
+        <button type="button" class="text-link" id="themeCycle">Cambiar apariencia <span aria-hidden="true">↗</span></button>
+        <button type="button" class="text-link" id="sidebarPreferences">Personalizar lectura <span aria-hidden="true">↗</span></button>
+      </div>
+    </aside>
+    <button type="button" class="sidebar-backdrop" id="sidebarBackdrop" tabindex="-1" aria-label="Cerrar navegación"></button>
+    <div class="workspace">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Abrir navegación" aria-controls="sidebar" aria-expanded="false">☰</button>
+        <div class="bread"><span>ARCHIVO / MS 408</span><span class="crumb-separator">/</span><strong id="breadCurrent">Inicio</strong></div>
+        <div class="top-actions"><span id="offlineStatus" class="offline-status" role="status" aria-live="polite">Comprobando conexión…</span><button type="button" id="applyUpdate" class="offline-update" hidden>Actualizar app</button><button type="button" id="openSearch" class="top-tool search-tool" aria-label="Abrir búsqueda de archivo" aria-keyshortcuts="Control+K Meta+K"><span class="tool-symbol" aria-hidden="true">⌕</span><span>Buscar</span><kbd>⌘ K</kbd></button><button type="button" id="openPreferences" class="top-tool preferences-tool" aria-label="Personalización y accesibilidad" title="Personalización y accesibilidad">⚙</button><label class="theme-label" for="themePicker">SKIN</label><select id="themePicker" aria-label="Seleccionar apariencia"><option value="nocturno">Biblioteca oscura</option><option value="pergamino">Pergamino</option><option value="laboratorio">Laboratorio</option></select><span class="live-pill">EDICIÓN 11</span></div>
+      </header>
+      <main id="main" tabindex="-1" aria-live="polite"></main>
+      <footer class="footer"><span>VOYNICH 404 / INDEPENDENT RESEARCH ARCHIVE</span><span>FUENTES ANTES QUE MISTERIOS · v0.11.1 RC2</span></footer>
+    </div>
+  </div>
+  <dialog id="searchDialog" class="command-dialog" aria-labelledby="searchDialogTitle">
+    <div class="dialog-topline"><span>VOYNICH 404 / ÍNDICE</span><button type="button" class="dialog-dismiss" data-close-dialog="searchDialog" aria-label="Cerrar búsqueda">ESC ×</button></div>
+    <h2 id="searchDialogTitle">Buscar en el archivo</h2>
+    <label class="search-field" for="globalSearch"><span aria-hidden="true">⌕</span><input type="search" id="globalSearch" placeholder="Sección, hipótesis, evidencia…" autocomplete="off" spellcheck="false" maxlength="100"></label>
+    <p class="micro search-help">Busca por título o descripción; el buscador solo consulta el contenido incorporado a la aplicación.</p>
+    <div id="searchResults" class="command-results" aria-live="polite"></div>
+    <div class="command-footer"><span>↵ Abrir resultado</span><span>↑ ↓ Navegar</span><span>ESC Cerrar</span></div>
+  </dialog>
+  <dialog id="preferencesDialog" class="preferences-dialog" aria-labelledby="preferencesTitle">
+    <div class="dialog-topline"><span>VOYNICH 404 / ESTUDIO</span><button type="button" class="dialog-dismiss" data-close-dialog="preferencesDialog" aria-label="Cerrar preferencias">ESC ×</button></div>
+    <div class="eyebrow">CONFIGURACIÓN DE EXPERIENCIA</div><h2 id="preferencesTitle">Tu sala de lectura.</h2>
+    <p class="preferences-intro">Personaliza el aspecto y la lectura. Tus elecciones se guardan únicamente en este navegador.</p>
+    <div class="pref-block"><h3>Apariencia</h3><div class="skin-options" role="group" aria-label="Elegir apariencia"><button type="button" data-skin="nocturno" class="skin-option"><span class="skin-swatch skin-nocturno"></span><strong>Biblioteca</strong><small>Oscura y dorada</small></button><button type="button" data-skin="pergamino" class="skin-option"><span class="skin-swatch skin-pergamino"></span><strong>Pergamino</strong><small>Lectura cálida</small></button><button type="button" data-skin="laboratorio" class="skin-option"><span class="skin-swatch skin-laboratorio"></span><strong>Laboratorio</strong><small>Verde espectral</small></button></div></div>
+    <div class="pref-block"><h3>Tamaño del texto</h3><div class="setting-buttons" role="group" aria-label="Tamaño del texto"><button type="button" data-size="compacta">A− <span>Compacta</span></button><button type="button" data-size="normal">A <span>Normal</span></button><button type="button" data-size="amplia">A+ <span>Amplia</span></button></div></div>
+    <div class="pref-block pref-motion"><div><h3>Animaciones</h3><p>Desactívalas para una experiencia estática. Se respetará también la configuración de movimiento reducido del sistema.</p></div><button type="button" id="motionToggle" class="motion-switch" aria-pressed="false" aria-label="Desactivar animaciones">Activadas</button></div>
+    <button type="button" id="resetPreferences" class="small-link">Restablecer preferencias ↺</button>
+  </dialog>
+  <dialog id="detailDialog" aria-labelledby="dialogTitle"><div id="detailContent"></div><button type="button" id="closeDialog" class="dialog-close" aria-label="Cerrar detalle">×</button></dialog>
+  <div class="toast" role="status" aria-live="polite" id="toast"></div>
+</body>
+</html>
